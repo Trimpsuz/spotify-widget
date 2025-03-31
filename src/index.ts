@@ -1,6 +1,8 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
+import { rateLimiter } from 'hono-rate-limiter';
 import { SpotifyApi } from '@spotify/web-api-ts-sdk';
+import { getConnInfo } from 'hono/bun';
 
 interface Artist {
   external_urls: { spotify: string };
@@ -194,22 +196,30 @@ app.get('/callback', async (c) => {
   return c.text('Success');
 });
 
-app.get('/widget', cors({ origin: '*' }), async (c) => {
-  if (!api || (await api.getAccessToken()) == null) return c.text('Authenticate first');
+app.get(
+  '/widget',
+  cors({ origin: '*' }),
+  rateLimiter({
+    windowMs: 1 * 60 * 1000,
+    limit: 30,
+    keyGenerator: (c) => getConnInfo(c).remote.address || '',
+  }),
+  async (c) => {
+    if (!api || (await api.getAccessToken()) == null) return c.text('Authenticate first');
 
-  const paused = c.req.query().paused;
-  const lastPlayed = c.req.query().lastPlayed;
-  const progressBar = c.req.query().progressBar;
+    const paused = c.req.query().paused;
+    const lastPlayed = c.req.query().lastPlayed;
+    const progressBar = c.req.query().progressBar;
 
-  let track: any = await api.player.getCurrentlyPlayingTrack();
+    let track: any = await api.player.getCurrentlyPlayingTrack();
 
-  if (track && (track.is_playing || paused == 'true')) {
-    const imageBase64 = await fetch(track.item.album.images[0].url).then(async (res) => {
-      return Buffer.from(new Uint8Array(await res.arrayBuffer())).toString('base64');
-    });
+    if (track && (track.is_playing || paused == 'true')) {
+      const imageBase64 = await fetch(track.item.album.images[0].url).then(async (res) => {
+        return Buffer.from(new Uint8Array(await res.arrayBuffer())).toString('base64');
+      });
 
-    return c.text(
-      `<svg width="429px" height="160px" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+      return c.text(
+        `<svg width="429px" height="160px" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
         <style>
           @font-face {
             font-family: 'gg sans';
@@ -445,20 +455,20 @@ app.get('/widget', cors({ origin: '*' }), async (c) => {
           </div>
         </foreignObject>
       </svg>`,
-      200,
-      { 'Content-Type': 'image/svg+xml', 'Cache-Control': 'no-store' }
-    );
-  }
+        200,
+        { 'Content-Type': 'image/svg+xml', 'Cache-Control': 'no-store' }
+      );
+    }
 
-  if (lastPlayed == 'true') track = (await api.player.getRecentlyPlayedTracks()).items[0].track;
+    if (lastPlayed == 'true') track = (await api.player.getRecentlyPlayedTracks()).items[0].track;
 
-  if (track && lastPlayed == 'true') {
-    const imageBase64 = await fetch(track.album.images[0].url).then(async (res) => {
-      return Buffer.from(new Uint8Array(await res.arrayBuffer())).toString('base64');
-    });
+    if (track && lastPlayed == 'true') {
+      const imageBase64 = await fetch(track.album.images[0].url).then(async (res) => {
+        return Buffer.from(new Uint8Array(await res.arrayBuffer())).toString('base64');
+      });
 
-    return c.text(
-      `<svg width="429px" height="160px" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+      return c.text(
+        `<svg width="429px" height="160px" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
         <style>
           @font-face {
             font-family: 'gg sans';
@@ -621,13 +631,13 @@ app.get('/widget', cors({ origin: '*' }), async (c) => {
           </div>
         </foreignObject>
       </svg>`,
-      200,
-      { 'Content-Type': 'image/svg+xml', 'Cache-Control': 'no-store' }
-    );
-  }
+        200,
+        { 'Content-Type': 'image/svg+xml', 'Cache-Control': 'no-store' }
+      );
+    }
 
-  return c.text(
-    `<svg width="429px" height="160px" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    return c.text(
+      `<svg width="429px" height="160px" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
         <style>
           @font-face {
             font-family: 'gg sans';
@@ -665,10 +675,11 @@ app.get('/widget', cors({ origin: '*' }), async (c) => {
           </div>
         </foreignObject>
       </svg>`,
-    200,
-    { 'Content-Type': 'image/svg+xml', 'Cache-Control': 'no-store' }
-  );
-});
+      200,
+      { 'Content-Type': 'image/svg+xml', 'Cache-Control': 'no-store' }
+    );
+  }
+);
 
 app.get('*', (c) => {
   return c.redirect('https://github.com/Trimpsuz/spotify-widget');

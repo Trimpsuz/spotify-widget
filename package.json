@@ -5,7 +5,8 @@
   },
   "dependencies": {
     "@spotify/web-api-ts-sdk": "^1.2.0",
-    "hono": "^4.7.5"
+    "hono": "^4.7.5",
+    "hono-rate-limiter": "^0.4.2"
   },
   "devDependencies": {
     "@types/bun": "latest"
