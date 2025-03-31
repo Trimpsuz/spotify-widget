@@ -670,4 +670,8 @@ app.get('/widget', cors({ origin: '*' }), async (c) => {
   );
 });
 
+app.get('*', (c) => {
+  return c.redirect('https://github.com/Trimpsuz/spotify-widget');
+});
+
 export default app;
