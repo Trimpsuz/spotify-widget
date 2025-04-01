@@ -27,7 +27,7 @@ Discord-style widget for Spotify
    ```sh
    bun start
    ```
-8. Visit the **Spotify OAuth URL** printed to the console and authrozie the app
+8. Visit the **Spotify OAuth URL** printed to the console and authorize the app
 9. The `/widget` and `/redirect` routes are now accessible
 
 ## Query parameters
