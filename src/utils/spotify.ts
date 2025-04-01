@@ -3,9 +3,9 @@ let verify: { verifier: string; challenge: string };
 export const generateSpotifyAuthUrl = async () => {
   const generateVerifier = (size: number) => {
     let value = '';
-    const dictionnary = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const dictionary = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     for (let idx = 0; idx < size; idx++) {
-      value += dictionnary.charAt(Math.floor(Math.random() * dictionnary.length));
+      value += dictionary.charAt(Math.floor(Math.random() * dictionary.length));
     }
     return value;
   };
