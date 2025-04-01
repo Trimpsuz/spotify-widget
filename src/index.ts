@@ -472,6 +472,56 @@ app.get(
   }
 );
 
+app.get(
+  '/redirect',
+  rateLimiter({
+    windowMs: 1 * 60 * 1000,
+    limit: 30,
+    keyGenerator: (c) => getConnInfo(c).remote.address || '',
+  }),
+  async (c) => {
+    if (!api || (await api.getAccessToken()) == null) return c.text('Authenticate first');
+
+    const paused = c.req.query().paused;
+    const lastPlayed = c.req.query().lastPlayed;
+    const mode = c.req.query().mode;
+
+    let track: any = await api.player.getCurrentlyPlayingTrack();
+
+    if (track && (track.is_playing || paused == 'true')) {
+      switch (mode) {
+        case 'track':
+          return c.redirect(track.item.external_urls.spotify);
+        case 'artist':
+          return c.redirect(track.item.artists[0].external_urls.spotify);
+        case 'album':
+          return c.redirect(track.item.album.external_urls.spotify);
+      }
+    }
+
+    if (lastPlayed == 'true') track = (await api.player.getRecentlyPlayedTracks()).items[0].track;
+
+    if (track && lastPlayed == 'true') {
+      switch (mode) {
+        case 'track':
+          return c.redirect(track.external_urls.spotify);
+        case 'artist':
+          return c.redirect(track.artists[0].external_urls.spotify);
+        case 'album':
+          return c.redirect(track.album.external_urls.spotify);
+      }
+    }
+
+    const query = c.req.query();
+    delete query.mode;
+    const params = new URLSearchParams();
+    Object.entries(query).forEach(([key, value]) => {
+      params.append(key, value);
+    });
+    return c.redirect(`/widget?${params}`);
+  }
+);
+
 app.get('*', (c) => {
   return c.redirect('https://github.com/Trimpsuz/spotify-widget');
 });
