@@ -7,6 +7,7 @@ import type { Artist } from './types';
 import { fontMono, fontSans, fonts, spotifyIconBase64 } from './contants';
 import { generateSpotifyAuthUrl, getAccessToken } from './utils/spotify';
 import { formatTime, getTimer } from './utils/utils';
+import { escape } from 'html-escaper';
 
 const app = new Hono();
 
@@ -164,7 +165,7 @@ app.get(
                       style="color: inherit; text-decoration: none;"
                       onmouseover="this.style.textDecoration='underline';" 
                       onmouseout="this.style.textDecoration='none';"
-                    >${track.item.name}</a>
+                    >${escape(track.item.name)}</a>
                   </div>
                 </div>
                 <div>
@@ -187,7 +188,7 @@ app.get(
                             style="color: inherit; text-decoration: none;"
                             onmouseover="this.style.textDecoration='underline';" 
                             onmouseout="this.style.textDecoration='none';"
-                          >${artist.name}</a>${index < arr.length - 1 ? ', ' : ''}`
+                          >${escape(artist.name)}</a>${index < arr.length - 1 ? ', ' : ''}`
                       )
                       .join('')}
                   </div>
@@ -394,7 +395,7 @@ app.get(
                       style="color: inherit; text-decoration: none;"
                       onmouseover="this.style.textDecoration='underline';" 
                       onmouseout="this.style.textDecoration='none';"
-                    >${track.name}</a>
+                    >${escape(track.name)}</a>
                   </div>
                 </div>
                 <div>
@@ -417,7 +418,7 @@ app.get(
                             style="color: inherit; text-decoration: none;"
                             onmouseover="this.style.textDecoration='underline';" 
                             onmouseout="this.style.textDecoration='none';"
-                          >${artist.name}</a>${index < arr.length - 1 ? ', ' : ''}`
+                          >${escape(artist.name)}</a>${index < arr.length - 1 ? ', ' : ''}`
                       )
                       .join('')}
                   </div>

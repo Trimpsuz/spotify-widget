@@ -6,8 +6,10 @@
   },
   "dependencies": {
     "@spotify/web-api-ts-sdk": "^1.2.0",
+    "@types/html-escaper": "^3.0.4",
     "hono": "^4.7.5",
-    "hono-rate-limiter": "^0.4.2"
+    "hono-rate-limiter": "^0.4.2",
+    "html-escaper": "^3.0.3"
   },
   "devDependencies": {
     "@types/bun": "latest"
