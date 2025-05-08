@@ -49,9 +49,6 @@ app.get(
     let track: any = await api.player.getCurrentlyPlayingTrack();
 
     if (track && (track.is_playing || paused == 'true')) {
-      console.log(track.item.album.images);
-      console.log(track.item.album);
-
       let imageBase64;
 
       if (track.item.album.images.length != 0) {
