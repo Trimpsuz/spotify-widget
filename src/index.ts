@@ -4,7 +4,7 @@ import { rateLimiter } from 'hono-rate-limiter';
 import { SpotifyApi } from '@spotify/web-api-ts-sdk';
 import { getConnInfo } from 'hono/bun';
 import type { Artist } from './types';
-import { fontMono, fontSans, fonts, spotifyIconBase64 } from './contants';
+import { fontMono, fontSans, fonts, noCoverBase64, spotifyIconBase64 } from './contants';
 import { generateSpotifyAuthUrl, getAccessToken } from './utils/spotify';
 import { formatTime, getTimer } from './utils/utils';
 import { escape } from 'html-escaper';
@@ -49,9 +49,18 @@ app.get(
     let track: any = await api.player.getCurrentlyPlayingTrack();
 
     if (track && (track.is_playing || paused == 'true')) {
-      const imageBase64 = await fetch(track.item.album.images[0].url).then(async (res) => {
-        return Buffer.from(new Uint8Array(await res.arrayBuffer())).toString('base64');
-      });
+      console.log(track.item.album.images);
+      console.log(track.item.album);
+
+      let imageBase64;
+
+      if (track.item.album.images.length != 0) {
+        imageBase64 = await fetch(track.item.album.images[0].url).then(async (res) => {
+          return Buffer.from(new Uint8Array(await res.arrayBuffer())).toString('base64');
+        });
+      } else {
+        imageBase64 = noCoverBase64;
+      }
 
       return c.text(
         `<svg width="429px" height="160px" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -279,9 +288,15 @@ app.get(
     if (lastPlayed == 'true') track = (await api.player.getRecentlyPlayedTracks()).items[0].track;
 
     if (track && lastPlayed == 'true') {
-      const imageBase64 = await fetch(track.album.images[0].url).then(async (res) => {
-        return Buffer.from(new Uint8Array(await res.arrayBuffer())).toString('base64');
-      });
+      let imageBase64;
+
+      if (track.item.album.images.length != 0) {
+        imageBase64 = await fetch(track.album.images[0].url).then(async (res) => {
+          return Buffer.from(new Uint8Array(await res.arrayBuffer())).toString('base64');
+        });
+      } else {
+        imageBase64 = noCoverBase64;
+      }
 
       return c.text(
         `<svg width="429px" height="160px" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
