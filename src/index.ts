@@ -287,7 +287,7 @@ app.get(
     if (track && lastPlayed == 'true') {
       let imageBase64;
 
-      if (track.item.album.images.length != 0) {
+      if (track.album.images.length != 0) {
         imageBase64 = await fetch(track.album.images[0].url).then(async (res) => {
           return Buffer.from(new Uint8Array(await res.arrayBuffer())).toString('base64');
         });
